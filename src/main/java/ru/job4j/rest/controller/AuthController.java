@@ -60,7 +60,7 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtGenerator.generateToken(authentication);
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Bearer " + token); // Add the token to the Authorization header
+        headers.add("Authorization", "Bearer " + token);
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(new AuthResponseDto(token));
