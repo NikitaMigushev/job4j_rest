@@ -2,6 +2,7 @@ package ru.job4j.rest.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -58,6 +59,10 @@ public class AuthController {
                         loginDto.getUsername(), loginDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtGenerator.generateToken(authentication);
-        return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token); // Add the token to the Authorization header
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(new AuthResponseDto(token));
     }
 }
