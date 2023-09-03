@@ -1,6 +1,7 @@
 package ru.job4j.rest.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.util.HashSet;
@@ -16,6 +17,7 @@ public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
+    @Positive
     private Long id;
 
     @Getter

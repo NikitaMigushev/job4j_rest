@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Component;
+import ru.job4j.rest.dto.LoginDto;
 import ru.job4j.rest.dto.RegisterDto;
 
 import java.util.Set;
@@ -19,5 +20,13 @@ public class DtoValidator {
            throw new IllegalArgumentException("RegisterDto has not passed validation", new ConstraintViolationException(violations));
        }
        return true;
+    }
+
+    public boolean validateLoginDto(LoginDto loginDto) {
+        Set<ConstraintViolation<LoginDto>> violations = VALIDATOR.validate(loginDto);
+        if (!violations.isEmpty()) {
+            throw new IllegalArgumentException("LoginDto has not passed validation", new ConstraintViolationException(violations));
+        }
+        return true;
     }
 }
