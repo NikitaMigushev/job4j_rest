@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,11 +57,12 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
         validator.validateRegisterDto(registerDto);
-        if (userService.existsByUserName(registerDto.getUsername())) {
-            return new ResponseEntity<>("Username already exists", HttpStatus.BAD_REQUEST);
+        try {
+            userService.save(registerDto);
+            return new ResponseEntity<>("User has been registered successfully", HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
         }
-        userService.save(registerDto);
-        return new ResponseEntity<>("User has been registered successfully", HttpStatus.OK);
     }
 
     @PostMapping("login")
