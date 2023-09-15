@@ -4,6 +4,7 @@ package ru.job4j.rest.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +56,7 @@ public class AuthController {
 
 
     @PostMapping("register")
-    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
-        validator.validateRegisterDto(registerDto);
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterDto registerDto) {
         var savedUser = userService.save(registerDto);
         if (savedUser.isEmpty()) {
             return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
@@ -65,9 +65,8 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginDto loginDto) {
         try {
-            validator.validateLoginDto(loginDto);
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDto.getUsername(), loginDto.getPassword()));
