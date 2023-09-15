@@ -16,6 +16,8 @@ import ru.job4j.rest.service.UserService;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -29,6 +31,28 @@ public class UserController {
     public UserController(final UserService userService, ObjectMapper objectMapper) {
         this.userService = userService;
         this.objectMapper = objectMapper;
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> patchUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+        Optional<UserEntity> foundUser = userService.findById(id);
+        if (foundUser.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        UserEntity user = foundUser.get();
+
+        for (String field : updates.keySet()) {
+            if (field.equals("username")) {
+                user.setUsername((String) updates.get("username"));
+            } else if (field.equals("password")) {
+                user.setPassword((String) updates.get("password"));
+            } else if (field.equals("enabled")) {
+                user.setEnabled((Boolean) updates.get("enabled"));
+            }
+        }
+        userService.save(user);
+        return ResponseEntity.ok("User updated successfully");
     }
 
     @GetMapping("/")

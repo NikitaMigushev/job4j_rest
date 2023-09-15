@@ -53,6 +53,7 @@ public class AuthController {
         this.objectMapper = objectMapper;
     }
 
+
     @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
         validator.validateRegisterDto(registerDto);
