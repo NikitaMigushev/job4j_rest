@@ -1,6 +1,8 @@
 package ru.job4j.rest.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 @Transactional
+@Slf4j
 public class SimpleUserService implements UserService {
     private final UserRepository userRepository;
 
@@ -34,14 +37,20 @@ public class SimpleUserService implements UserService {
         user.setRoles(userRoles);
         user.setEnabled(true);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        var savedUser = userRepository.save(user);
-        return Optional.ofNullable(userRepository.save(savedUser));
+        try {
+            var savedUser = userRepository.save(user);
+            return Optional.of(savedUser);
+        } catch (DataIntegrityViolationException e) {
+            logError("Username already exists: ", e);
+        }
+        return Optional.empty();
     }
 
     @Override
     public Optional<UserEntity> save(RegisterDto registerDto) {
         UserEntity user = converter.convertRegisterDtoToUserEntity(registerDto);
-        return save(user);
+        var savedUser = save(user);
+        return savedUser;
     }
 
     @Override
@@ -88,5 +97,9 @@ public class SimpleUserService implements UserService {
     @Override
     public Optional<UserEntity> findById(Long id) {
         return userRepository.findById(id);
+    }
+
+    private void logError(String message, Throwable e) {
+        log.error(message, e);
     }
 }
