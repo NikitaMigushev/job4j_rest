@@ -4,10 +4,8 @@ package ru.job4j.rest.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +28,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/auth/")
+@Slf4j
 public class AuthController {
     private UserService userService;
     private AuthenticationManager authenticationManager;
@@ -38,7 +37,6 @@ public class AuthController {
 
     private JWTGenerator jwtGenerator;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class.getSimpleName());
     private final ObjectMapper objectMapper;
 
     @Autowired
@@ -57,12 +55,12 @@ public class AuthController {
     @PostMapping("register")
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) {
         validator.validateRegisterDto(registerDto);
-        try {
-            userService.save(registerDto);
-            return new ResponseEntity<>("User has been registered successfully", HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
+        var savedUser = userService.save(registerDto);
+        System.out.println("Check here");
+        if (savedUser.isEmpty()) {
             return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
         }
+        return new ResponseEntity<>("User has been registered successfully", HttpStatus.OK);
     }
 
     @PostMapping("login")
@@ -84,14 +82,16 @@ public class AuthController {
         }
     }
 
-    @ExceptionHandler(value = { AuthenticationException.class })
+    @ExceptionHandler(value = {AuthenticationException.class})
     public void exceptionHandler(Exception e, HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatus.BAD_REQUEST.value());
         response.setContentType("application/json");
-        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() { {
-            put("message", e.getMessage());
-            put("type", e.getClass());
-        }}));
-        LOGGER.error(e.getLocalizedMessage());
+        response.getWriter().write(objectMapper.writeValueAsString(new HashMap<>() {
+            {
+                put("message", e.getMessage());
+                put("type", e.getClass());
+            }
+        }));
+        log.error(e.getLocalizedMessage());
     }
 }
