@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.job4j.rest.converter.RegisterDtoUserConverter;
 import ru.job4j.rest.dto.RegisterDto;
 import ru.job4j.rest.model.UserEntity;
@@ -17,7 +16,6 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
 public class SimpleUserService implements UserService {
     private final UserRepository userRepository;
 
@@ -36,8 +34,7 @@ public class SimpleUserService implements UserService {
         user.setEnabled(true);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
-            var savedUser = userRepository.save(user);
-            return Optional.ofNullable(userRepository.save(savedUser));
+            return Optional.ofNullable(userRepository.save(user));
         } catch (DataIntegrityViolationException e) {
             return Optional.empty();
         }
