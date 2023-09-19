@@ -1,6 +1,7 @@
 package ru.job4j.rest.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class SimpleUserService implements UserService {
     private final UserRepository userRepository;
 
@@ -34,10 +36,11 @@ public class SimpleUserService implements UserService {
         user.setEnabled(true);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
-            return Optional.ofNullable(userRepository.save(user));
+            return Optional.of(userRepository.save(user));
         } catch (DataIntegrityViolationException e) {
-            return Optional.empty();
+            log.error("User already exists", e);
         }
+        return Optional.empty();
     }
 
     @Override
